@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 //import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 //import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,8 +28,13 @@ import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
     // securedEnabled = true,
     // jsr250Enabled = true,
     prePostEnabled = true)
-public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
-  //TODO Add cors disable
+public class WebSecurityConfig  extends WebSecurityConfigurerAdapter {
+  @Override
+  public void configure(WebSecurity web) throws Exception {
+    web.ignoring().antMatchers("/**");
+  }
+
+  //  //TODO Add cors disable
 
   @Autowired
   UserDetailsServiceImpl userDetailsService;
@@ -45,14 +52,14 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 //  public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
 //    authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 //  }
-  
+
   @Bean
   public DaoAuthenticationProvider authenticationProvider() {
       DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-       
+
       authProvider.setUserDetailsService(userDetailsService);
       authProvider.setPasswordEncoder(passwordEncoder());
-   
+
       return authProvider;
   }
 
@@ -61,11 +68,13 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 //  public AuthenticationManager authenticationManagerBean() throws Exception {
 //    return super.authenticationManagerBean();
 //  }
-  
+
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
     return authConfig.getAuthenticationManager();
   }
+
+
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -83,23 +92,23 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 //
 //    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 //  }
-  
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.cors().and().csrf().disable()
-        .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-//        .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-        .authorizeRequests().antMatchers("/**").permitAll()
-        .antMatchers("/api/test/**").permitAll()
-        .anyRequest().authenticated();
-    
-    http.authenticationProvider(authenticationProvider());
 
-    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-    
-    return http.build();
-  }
+//  @Bean
+//  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//    http.cors().and().csrf().disable()
+//        .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+//        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+////        .authorizeRequests().antMatchers("/api/auth/**").permitAll()
+//        .authorizeRequests().antMatchers("/**").permitAll()
+//        .antMatchers("/api/test/**").permitAll()
+//        .anyRequest().authenticated();
+//
+//    http.authenticationProvider(authenticationProvider());
+//
+//    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+//
+//    return http.build();
+//  }
 
 
 }

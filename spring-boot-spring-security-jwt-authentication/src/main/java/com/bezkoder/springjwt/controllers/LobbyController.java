@@ -9,6 +9,7 @@ import com.bezkoder.springjwt.services.LobbyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/v1/lobby")
+@Component
 public class LobbyController {
 
 
@@ -29,7 +31,7 @@ public class LobbyController {
     }
 
     @PostMapping("/join")
-    public ResponseEntity<?> joinLobby(@RequestParam (name = "joincode") int joinCode) throws BadamSattiExceptio {
-        return lobbyService.joinLobby(joinCode);
+    public ResponseEntity<?> joinLobby(@RequestParam (name = "joincode") int joinCode, int userId) throws BadamSattiExceptio {
+        return lobbyService.joinLobby(joinCode, userId);
     }
 }

@@ -9,16 +9,13 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author Aditya Patil
- * @Date 08-03-2023
+ * @Date 11-03-2023
  */
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlayerDetails {
-    private int cardPlayed;
-    private int currentUserId;
-
-    private int lastPlayedUserId;
-    private int lobbyJoinCode;
+public class JoinLobbyDetails {
+    private int lobbyId;
+    private int userId;
 }

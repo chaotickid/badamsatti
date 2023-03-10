@@ -46,9 +46,9 @@ public class LobbyService {
 
     public Lobby createLobby(Lobby lobby) {
         Lobby lobby1 = new Lobby();
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user1 = userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("User with id not found: " + user.getId()));
-        lobby1.setLobbyOwnerId(user.getId());
+        //UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user1 = userRepository.findById(lobby.getLobbyOwnerId()).orElseThrow(() -> new RuntimeException("User with id not found: " + lobby.getLobbyOwnerId()));
+        lobby1.setLobbyOwnerId(lobby.getLobbyOwnerId());
         lobby1.setLobbySize(lobby.getLobbySize());
         lobby1.setLobbyCode(cardServices.generate6DigitCode());
         lobby1.setLobbyStatus("ACTIVE");
@@ -62,11 +62,19 @@ public class LobbyService {
         return lobby1;
     }
 
-    public ResponseEntity<?> joinLobby(int joinCode) throws BadamSattiExceptio {
-        UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user1 = userRepository.findById(user.getId()).orElseThrow(() -> new RuntimeException("User with id not found: " + user.getId()));
+    public ResponseEntity<?> joinLobby(int joinCode, int userId) throws BadamSattiExceptio {
+        //UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user1 = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User with id not found: " + userId));
         System.out.println(user1.getUserId() + " : " + user1.getUsername());
         Lobby lobby = lobbyRepository.findByLobbyCode(joinCode);
+        if(userId == lobby.getLobbyOwnerId()){
+            return new ResponseEntity<>(
+                    new ErrorObject(String.valueOf(Instant.now()),
+                            "This user created lobby and already joined the lobby", HttpStatus.NOT_FOUND)
+                    , HttpStatus.NOT_FOUND);
+        }
+
+
         if (lobby == null) {
             return new ResponseEntity<>(
                     new ErrorObject(String.valueOf(Instant.now()), "Lobby not found", HttpStatus.NOT_FOUND)
