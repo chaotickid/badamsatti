@@ -4,7 +4,6 @@ package com.bezkoder.springjwt.services;
  */
 
 import com.bezkoder.springjwt.exceptions.ErrorObject;
-import com.bezkoder.springjwt.exceptions.BadamSattiExceptio;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.User;
 import com.bezkoder.springjwt.repository.LobbyRepository;
@@ -62,7 +61,7 @@ public class LobbyService {
         return lobby1;
     }
 
-    public ResponseEntity<?> joinLobby(int joinCode, int userId) throws BadamSattiExceptio {
+    public ResponseEntity<?> joinLobby(int joinCode, int userId)  {
         //UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user1 = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User with id not found: " + userId));
         System.out.println(user1.getUserId() + " : " + user1.getUsername());

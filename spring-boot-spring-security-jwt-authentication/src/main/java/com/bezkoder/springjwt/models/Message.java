@@ -21,6 +21,8 @@ public class Message {
 
     private Object requestBody;
 
+    private Object errorObject;
+
 
     private String errorMsg;
     private int statusCode;
