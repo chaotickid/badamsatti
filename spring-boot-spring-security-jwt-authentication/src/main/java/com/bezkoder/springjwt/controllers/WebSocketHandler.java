@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 //TODO: here we need to add logic
 @RestController
-@RequestMapping("/badamsatti")
+//@RequestMapping("/badamsatti")
 public class WebSocketHandler {
 
     @Autowired
@@ -42,7 +44,9 @@ public class WebSocketHandler {
     @Autowired
     NextPlayerFinder nextPlayerFinder;
 
-    @GetMapping("/getmessage")
+//    @GetMapping("/getmessage")
+    @MessageMapping("/getmessage")
+    @SendTo("/return")
     public ResponseEntity<?> handleRequest(@RequestBody Message message) throws JsonProcessingException {
 
         ObjectMapper objectMapper = new ObjectMapper();
