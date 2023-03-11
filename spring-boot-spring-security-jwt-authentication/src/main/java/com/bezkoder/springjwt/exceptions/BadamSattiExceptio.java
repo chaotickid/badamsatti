@@ -6,7 +6,9 @@ package com.bezkoder.springjwt.exceptions;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -17,13 +19,22 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BadamSattiExceptio extends Exception{
-    private String message;
-    private LocalDate date= LocalDate.now();
+public class BadamSattiExceptio extends RuntimeException{
 
-    public BadamSattiExceptio(String msg){
+    private String messageType;
+    private Instant timeStamp;
+
+    private String statusCode;
+
+    private int statusCodeValue;
+
+
+    public BadamSattiExceptio(String msg, String messageType){
         super(msg);
-        this.message = msg;
+        this.messageType = messageType;
+        this.timeStamp = Instant.now();
+        this.statusCode = String.valueOf("INTERNAL_SERVER_ERROR");
+        this.statusCodeValue = 500;
     }
 }
 

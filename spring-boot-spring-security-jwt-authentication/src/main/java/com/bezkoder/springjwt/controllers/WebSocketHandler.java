@@ -3,13 +3,17 @@ package com.bezkoder.springjwt.controllers;
  * Copyright © 2023 Mavenir Systems
  */
 
+import com.bezkoder.springjwt.DTO.FirstDistribution;
 import com.bezkoder.springjwt.DTO.JoinLobbyDetails;
 import com.bezkoder.springjwt.DTO.PlayerDetails;
 import com.bezkoder.springjwt.constants.ApplicationConstants;
+import com.bezkoder.springjwt.exceptions.BadamSattiExceptio;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.Message;
 import com.bezkoder.springjwt.payload.request.LoginRequest;
 import com.bezkoder.springjwt.payload.request.SignupRequest;
+import com.bezkoder.springjwt.payload.response.JwtResponse;
+import com.bezkoder.springjwt.payload.response.MessageResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 //TODO: here we need to add logic
 @RestController
-//@RequestMapping("/badamsatti")
+@RequestMapping("/badamsatti")
 public class WebSocketHandler {
 
     @Autowired
@@ -44,9 +48,9 @@ public class WebSocketHandler {
     @Autowired
     NextPlayerFinder nextPlayerFinder;
 
-//    @GetMapping("/getmessage")
-    @MessageMapping("/getmessage")
-    @SendTo("/return")
+    @GetMapping("/getmessage")
+//    @MessageMapping("/getmessage")
+//    @SendTo("/return")
     public ResponseEntity<?> handleRequest(@RequestBody Message message) throws JsonProcessingException {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -54,17 +58,16 @@ public class WebSocketHandler {
         if (message.getMsg().equals(ApplicationConstants.SIGNUP_USER)) {
             try {
                 SignupRequest signupRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), SignupRequest.class);
-                Object object = authController.registerUser(signupRequest);
+                MessageResponse object = (MessageResponse) authController.registerUser(signupRequest).getBody();
 
                 Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.SIGNUP_USER);
                 sendMessage.setRequestBody(object);
                 return new ResponseEntity<>(sendMessage, HttpStatus.OK);
             } catch (Exception e) {
-                Message sendMessage = new Message();
-                sendMessage.setStatusCode(500);
-                sendMessage.setErrorMsg(e.getMessage());
-                return new ResponseEntity<>(sendMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNUP_USER);
+                System.out.println("Exception: "+ badamSattiExceptio);
+                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -72,17 +75,16 @@ public class WebSocketHandler {
             try {
                 //LoginRequest
                 LoginRequest loginRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), LoginRequest.class);
-                Object object = authController.authenticateUser(loginRequest);
+                JwtResponse object = (JwtResponse) authController.authenticateUser(loginRequest).getBody();
 
                 Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.SIGNIN_USER);
                 sendMessage.setRequestBody(object);
                 return new ResponseEntity<>(sendMessage, HttpStatus.OK);
             } catch (Exception e) {
-                Message sendMessage = new Message();
-                sendMessage.setStatusCode(500);
-                sendMessage.setErrorMsg(e.getMessage());
-                return new ResponseEntity<>(sendMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNIN_USER);
+                System.out.println("Exception: "+ badamSattiExceptio);
+                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
@@ -90,33 +92,31 @@ public class WebSocketHandler {
         try { //727332
             if (message.getMsg().equals(ApplicationConstants.CREATE_LOBBY)) {
                 Lobby lobby = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), Lobby.class);
-                Object object = lobbyController.createLobby(lobby);
+                Lobby object = lobbyController.createLobby(lobby).getBody();
                 Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.CREATE_LOBBY);
                 sendMessage.setRequestBody(object);
                 return new ResponseEntity<>(sendMessage, HttpStatus.OK);
             }
         } catch (Exception e) {
-            Message sendMessage = new Message();
-            sendMessage.setStatusCode(500);
-            sendMessage.setErrorMsg(e.getMessage());
-            return new ResponseEntity<>(sendMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.CREATE_LOBBY);
+            System.out.println("Exception: "+ badamSattiExceptio);
+            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         try {
             if (message.getMsg().equals(ApplicationConstants.JOIN_LOBBY)) {
                 JoinLobbyDetails joinLobbyDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), JoinLobbyDetails.class);
-                Object object = lobbyController.joinLobby(joinLobbyDetails.getLobbyId(), joinLobbyDetails.getUserId());
+                Lobby object = (Lobby) lobbyController.joinLobby(joinLobbyDetails.getLobbyId(), joinLobbyDetails.getUserId()).getBody();
                 Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.JOIN_LOBBY);
                 sendMessage.setRequestBody(object);
                 return new ResponseEntity<>(sendMessage, HttpStatus.OK);
             }
         } catch (Exception e) {
-            Message sendMessage = new Message();
-            sendMessage.setStatusCode(500);
-            sendMessage.setErrorMsg(e.getMessage());
-            return new ResponseEntity<>(sendMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.JOIN_LOBBY);
+            System.out.println("Exception: "+ badamSattiExceptio);
+            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
 
@@ -125,17 +125,16 @@ public class WebSocketHandler {
         try {
             if (message.getMsg().equals(ApplicationConstants.CARD_DISTRIBUTE)) {
                 JoinLobbyDetails joinLobbyDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), JoinLobbyDetails.class);
-                Object object = cardProcessingResource.shuffleAndDistribute(joinLobbyDetails.getLobbyId());
+                FirstDistribution object = cardProcessingResource.shuffleAndDistribute(joinLobbyDetails.getLobbyId());
                 Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.CARD_DISTRIBUTE);
                 sendMessage.setRequestBody(object);
                 return new ResponseEntity<>(sendMessage, HttpStatus.OK);
             }
         } catch (Exception e) {
-            Message sendMessage = new Message();
-            sendMessage.setStatusCode(500);
-            sendMessage.setErrorMsg(e.getMessage());
-            return new ResponseEntity<>(sendMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.CARD_DISTRIBUTE);
+            System.out.println("Exception: "+ badamSattiExceptio);
+            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
 
