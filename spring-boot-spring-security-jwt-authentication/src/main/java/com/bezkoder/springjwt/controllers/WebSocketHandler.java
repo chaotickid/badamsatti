@@ -55,54 +55,54 @@ public class WebSocketHandler {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        if (message.getMsg().equals(ApplicationConstants.SIGNUP_USER)) {
-            try {
-                SignupRequest signupRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), SignupRequest.class);
-                MessageResponse object = (MessageResponse) authController.registerUser(signupRequest).getBody();
+//        if (message.getMsg().equals(ApplicationConstants.SIGNUP_USER)) {
+//            try {
+//                SignupRequest signupRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), SignupRequest.class);
+//                MessageResponse object = (MessageResponse) authController.registerUser(signupRequest).getBody();
+//
+//                Message sendMessage = new Message();
+//                sendMessage.setMsg(ApplicationConstants.SIGNUP_USER);
+//                sendMessage.setRequestBody(object);
+//                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+//            } catch (Exception e) {
+//                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNUP_USER);
+//                System.out.println("Exception: "+ badamSattiExceptio);
+//                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+//            }
+//        }
 
-                Message sendMessage = new Message();
-                sendMessage.setMsg(ApplicationConstants.SIGNUP_USER);
-                sendMessage.setRequestBody(object);
-                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
-            } catch (Exception e) {
-                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNUP_USER);
-                System.out.println("Exception: "+ badamSattiExceptio);
-                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        if (message.getMsg().equals(ApplicationConstants.SIGNIN_USER)) {
-            try {
-                //LoginRequest
-                LoginRequest loginRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), LoginRequest.class);
-                JwtResponse object = (JwtResponse) authController.authenticateUser(loginRequest).getBody();
-
-                Message sendMessage = new Message();
-                sendMessage.setMsg(ApplicationConstants.SIGNIN_USER);
-                sendMessage.setRequestBody(object);
-                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
-            } catch (Exception e) {
-                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNIN_USER);
-                System.out.println("Exception: "+ badamSattiExceptio);
-                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
+//        if (message.getMsg().equals(ApplicationConstants.SIGNIN_USER)) {
+//            try {
+//                //LoginRequest
+//                LoginRequest loginRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), LoginRequest.class);
+//                JwtResponse object = (JwtResponse) authController.authenticateUser(loginRequest).getBody();
+//
+//                Message sendMessage = new Message();
+//                sendMessage.setMsg(ApplicationConstants.SIGNIN_USER);
+//                sendMessage.setRequestBody(object);
+//                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+//            } catch (Exception e) {
+//                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNIN_USER);
+//                System.out.println("Exception: "+ badamSattiExceptio);
+//                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+//            }
+//        }
 
         //-------------------------------------Lobby----------------------------------------------
-        try { //727332
-            if (message.getMsg().equals(ApplicationConstants.CREATE_LOBBY)) {
-                Lobby lobby = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), Lobby.class);
-                Lobby object = lobbyController.createLobby(lobby).getBody();
-                Message sendMessage = new Message();
-                sendMessage.setMsg(ApplicationConstants.CREATE_LOBBY);
-                sendMessage.setRequestBody(object);
-                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.CREATE_LOBBY);
-            System.out.println("Exception: "+ badamSattiExceptio);
-            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+//        try { //727332
+//            if (message.getMsg().equals(ApplicationConstants.CREATE_LOBBY)) {
+//                Lobby lobby = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), Lobby.class);
+//                Lobby object = lobbyController.createLobby(lobby).getBody();
+//                Message sendMessage = new Message();
+//                sendMessage.setMsg(ApplicationConstants.CREATE_LOBBY);
+//                sendMessage.setRequestBody(object);
+//                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+//            }
+//        } catch (Exception e) {
+//            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.CREATE_LOBBY);
+//            System.out.println("Exception: "+ badamSattiExceptio);
+//            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
 
         try {
             if (message.getMsg().equals(ApplicationConstants.JOIN_LOBBY)) {
@@ -137,21 +137,19 @@ public class WebSocketHandler {
             return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-
         try {
             if (message.getMsg().equals(ApplicationConstants.FIND_NEXT_PLAYER)) {
                 PlayerDetails playerDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), PlayerDetails.class);
-                Object object = nextPlayerFinder.findNextPlayer(playerDetails);
+                PlayerDetails object = nextPlayerFinder.findNextPlayer(playerDetails);
                 Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.FIND_NEXT_PLAYER);
                 sendMessage.setRequestBody(object);
                 return new ResponseEntity<>(sendMessage, HttpStatus.OK);
             }
         } catch (Exception e) {
-            Message sendMessage = new Message();
-            sendMessage.setStatusCode(500);
-            sendMessage.setErrorMsg(e.getMessage());
-            return new ResponseEntity<>(sendMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.FIND_NEXT_PLAYER);
+            System.out.println("Exception: "+ badamSattiExceptio);
+            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
 

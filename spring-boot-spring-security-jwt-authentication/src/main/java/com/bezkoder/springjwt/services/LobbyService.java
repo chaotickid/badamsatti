@@ -3,6 +3,7 @@ package com.bezkoder.springjwt.services;
  * Copyright © 2023 Mavenir Systems
  */
 
+import com.bezkoder.springjwt.DTO.UserDto;
 import com.bezkoder.springjwt.exceptions.ErrorObject;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.User;
@@ -56,6 +57,7 @@ public class LobbyService {
         lobby1.setNoOfConnectPeople(lobby1.getNoOfConnectPeople() + 1);
         lobby1.setTimeStampOfLobbyCreation(String.valueOf(Instant.now()));
         System.out.println("Lobby timing: " + lobby1.getTimeStampOfLobbyCreation());
+        lobby1.getListOfConnectedUsers().add(new UserDto(lobby.getLobbyOwnerId(), user1.getUsername()));
 //        lobby1.getSequenceOfUserId().add(user1.getUserId());
         lobbyRepository.save(lobby1);
         return lobby1;
@@ -102,6 +104,13 @@ public class LobbyService {
         lobby.addUserInTheLobby(user1);
         lobby.setNoOfConnectPeople(lobby.getNoOfConnectPeople() + 1);
 //        lobby.getSequenceOfUserId().add(user1.getUserId());
+        List<User> userList = lobby.getUserList();
+        for(int i=0; i< userList.size(); i++){
+            lobby.getListOfConnectedUsers().add(new UserDto(
+                    userList.get(i).getUserId(), userList.get(i).getUsername()
+            ));
+
+        }
         return new ResponseEntity<>(lobby, HttpStatus.OK);
     }
 }

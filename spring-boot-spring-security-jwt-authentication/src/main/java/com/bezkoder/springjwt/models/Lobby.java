@@ -4,6 +4,7 @@ package com.bezkoder.springjwt.models;
  */
 
 
+import com.bezkoder.springjwt.DTO.UserDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -30,10 +33,11 @@ public class Lobby {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int lobbyId;
 
-    @Max(4)
-    private int lobbySize;
+    @NotNull
+    private Integer lobbySize;
 
-    private int lobbyOwnerId;
+    @NotNull
+    private Integer lobbyOwnerId;
 
     @Column(unique = true)
     private int lobbyCode;
@@ -46,6 +50,8 @@ public class Lobby {
 
 //    @Transient
 //    private LinkedList<Integer> sequenceOfUserId= new LinkedList<>();
+    @Transient
+    private List<UserDto> listOfConnectedUsers = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "lobby", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
