@@ -54,9 +54,9 @@ public class WebSocketHandler {
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping("/getmessage")
-//    @MessageMapping("/getmessage")
-//    @SendTo("/return")
+//    @GetMapping("/getmessage")
+    @MessageMapping("/getmessage")
+    @SendTo("/return")
     public ResponseEntity<?> handleRequest(@RequestBody Message message) throws JsonProcessingException {
 
         ObjectMapper objectMapper = new ObjectMapper();
