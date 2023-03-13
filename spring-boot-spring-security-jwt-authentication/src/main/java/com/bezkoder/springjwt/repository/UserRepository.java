@@ -11,6 +11,8 @@ import com.bezkoder.springjwt.models.User;
 public interface UserRepository extends JpaRepository<User, Integer> {
   Optional<User> findByUsername(String username);
 
+  User findByEmail(String email);
+
   Boolean existsByUsername(String username);
 
   Boolean existsByEmail(String email);

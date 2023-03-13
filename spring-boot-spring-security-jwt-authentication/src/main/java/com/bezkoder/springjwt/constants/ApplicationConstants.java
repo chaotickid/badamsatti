@@ -14,4 +14,5 @@ public class ApplicationConstants {
     public static final String JOIN_LOBBY = "JOIN_LOBBY";
     public static final String CARD_DISTRIBUTE = "CARD_DISTRIBUTE";
     public static final String FIND_NEXT_PLAYER = "FIND_NEXT_PLAYER";
+    public static final String CHATTING_APP = "CHATTING_APP";
 }

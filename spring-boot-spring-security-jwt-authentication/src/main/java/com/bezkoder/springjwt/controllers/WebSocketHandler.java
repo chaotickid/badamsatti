@@ -3,6 +3,7 @@ package com.bezkoder.springjwt.controllers;
  * Copyright © 2023 Mavenir Systems
  */
 
+import com.bezkoder.springjwt.DTO.ChattingWindow;
 import com.bezkoder.springjwt.DTO.FirstDistribution;
 import com.bezkoder.springjwt.DTO.JoinLobbyDetails;
 import com.bezkoder.springjwt.DTO.PlayerDetails;
@@ -10,10 +11,12 @@ import com.bezkoder.springjwt.constants.ApplicationConstants;
 import com.bezkoder.springjwt.exceptions.BadamSattiExceptio;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.Message;
+import com.bezkoder.springjwt.models.User;
 import com.bezkoder.springjwt.payload.request.LoginRequest;
 import com.bezkoder.springjwt.payload.request.SignupRequest;
 import com.bezkoder.springjwt.payload.response.JwtResponse;
 import com.bezkoder.springjwt.payload.response.MessageResponse;
+import com.bezkoder.springjwt.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +51,9 @@ public class WebSocketHandler {
     @Autowired
     NextPlayerFinder nextPlayerFinder;
 
+    @Autowired
+    UserRepository userRepository;
+
     @GetMapping("/getmessage")
 //    @MessageMapping("/getmessage")
 //    @SendTo("/return")
@@ -55,21 +61,38 @@ public class WebSocketHandler {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-//        if (message.getMsg().equals(ApplicationConstants.SIGNUP_USER)) {
-//            try {
-//                SignupRequest signupRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), SignupRequest.class);
-//                MessageResponse object = (MessageResponse) authController.registerUser(signupRequest).getBody();
-//
-//                Message sendMessage = new Message();
-//                sendMessage.setMsg(ApplicationConstants.SIGNUP_USER);
-//                sendMessage.setRequestBody(object);
-//                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
-//            } catch (Exception e) {
-//                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNUP_USER);
-//                System.out.println("Exception: "+ badamSattiExceptio);
-//                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
-//            }
-//        }
+        try {
+            if (message.getMsg().equals(ApplicationConstants.CHATTING_APP)) {
+                ChattingWindow chattingWindow = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), ChattingWindow.class);
+                User user = userRepository.findById(chattingWindow.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+                chattingWindow.setUserName(user.getUsername());
+
+                Message sendMessage = new Message();
+                sendMessage.setMsg(ApplicationConstants.CHATTING_APP);
+                sendMessage.setRequestBody(chattingWindow);
+                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+            }
+        }catch (Exception e){
+            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.CHATTING_APP);
+            System.out.println("Exception: "+ badamSattiExceptio);
+            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if (message.getMsg().equals(ApplicationConstants.SIGNUP_USER)) {
+            try {
+                SignupRequest signupRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), SignupRequest.class);
+                MessageResponse object = (MessageResponse) authController.registerUser(signupRequest).getBody();
+
+                Message sendMessage = new Message();
+                sendMessage.setMsg(ApplicationConstants.SIGNUP_USER);
+                sendMessage.setRequestBody(object);
+                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+            } catch (Exception e) {
+                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNUP_USER);
+                System.out.println("Exception: "+ badamSattiExceptio);
+                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
 
 //        if (message.getMsg().equals(ApplicationConstants.SIGNIN_USER)) {
 //            try {
