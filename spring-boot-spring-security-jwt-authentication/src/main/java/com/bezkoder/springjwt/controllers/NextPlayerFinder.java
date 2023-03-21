@@ -26,7 +26,7 @@ public class NextPlayerFinder {
     private PlayerFinderService playerFinderService;
 
     @PostMapping("/findnext")
-    public PlayerDetails findNextPlayer(@RequestBody PlayerDetails playerDetails){
+    public PlayerDetails findNextPlayer(@RequestBody PlayerDetails playerDetails) throws Exception {
         return playerFinderService.getListOfSequenceOfUserId(playerDetails);
     }
 

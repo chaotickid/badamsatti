@@ -24,8 +24,11 @@ public class UserController {
     UserService userService;
 
     @GetMapping("/getUserDetails")
-    public UserCardDetailsDto getDetails(@RequestParam(name = "userId") int id){
-        return userService.getUserCardDetails(id);
+    public UserCardDetailsDto getDetails(
+            @RequestParam(name = "userId") int userId,
+            @RequestParam(name = "lobbyId") int lobbyId
+    ){
+        return userService.getUserCardDetails(userId, lobbyId);
     }
 
     @GetMapping("/getPoints")

@@ -67,8 +67,12 @@ public class LobbyService {
     public ResponseEntity<?> joinLobby(int joinCode, int userId)  {
         //UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user1 = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User with id not found: " + userId));
+        if(user1.getActivityStatus().equals(ApplicationConstants.PLAYING)){
+            throw new RuntimeException("User is already playing");
+        }
         System.out.println(user1.getUserId() + " : " + user1.getUsername());
         Lobby lobby = lobbyRepository.findByLobbyCode(joinCode);
+
         if(lobby.getLobbyStatus().equals(ApplicationConstants.CLOSED)){
             throw new RuntimeException("Lobby already closed.");
         }

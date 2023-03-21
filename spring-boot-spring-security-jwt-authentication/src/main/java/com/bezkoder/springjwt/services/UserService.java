@@ -7,15 +7,18 @@ import com.bezkoder.springjwt.DTO.ForgotPassword;
 import com.bezkoder.springjwt.DTO.PointsDto;
 import com.bezkoder.springjwt.DTO.UserCardDetailsDto;
 import com.bezkoder.springjwt.DTO.UserPoints;
+import com.bezkoder.springjwt.constants.ApplicationConstants;
 import com.bezkoder.springjwt.models.Card;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.User;
+import com.bezkoder.springjwt.repository.CardRepository;
 import com.bezkoder.springjwt.repository.LobbyRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -40,6 +43,9 @@ public class UserService {
 
     @Autowired
     LobbyRepository lobbyRepository;
+
+    @Autowired
+    CardRepository cardRepository;
 
     public HashMap<Integer, Integer> cardPoints(){
         HashMap<Integer, Integer> map = new HashMap<>();
@@ -108,7 +114,7 @@ public class UserService {
     }
 
 
-    public UserCardDetailsDto getUserCardDetails(int id){
+    public UserCardDetailsDto getUserCardDetails(int id, int lobbyId){
 
         UserCardDetailsDto userCardDetailsDto = new UserCardDetailsDto();
         User user = userRepository.findById(id).orElseThrow(()-> new RuntimeException("User not found"));
@@ -116,10 +122,12 @@ public class UserService {
         userCardDetailsDto.setUserName(user.getUsername());
 
         List<Integer> cardIntList = new ArrayList<>();
-        List<Card> cardList = user.getCardIdList();
+        List<Card> cardList = cardRepository.findByLobbyJoinCodeAndUserUserId(lobbyId, user.getUserId());
 
-        for(int i=0; i<cardList.size(); i++){
-            cardIntList.add(cardList.get(i).getCardNumber());
+        if(!CollectionUtils.isEmpty(cardList)) {
+            for (int i = 0; i < cardList.size(); i++) {
+                cardIntList.add(cardList.get(i).getCardNumber());
+            }
         }
         userCardDetailsDto.setCardList(cardIntList);
         return userCardDetailsDto;
@@ -138,7 +146,9 @@ public class UserService {
             List<Card> cardList = userList.get(i).getCardIdList();
             int result= 0;
             for(int j=0; j<cardList.size(); j++){
-                result = result + map.get(cardList.get(j).getCardNumber());
+                if(cardList.get(j).getCardPlacedStatus().equals(ApplicationConstants.NOT_PLAYED)) {
+                    result = result + map.get(cardList.get(j).getCardNumber());
+                }
             }
             userPoints.setUserId(userList.get(i).getUserId());
             userPoints.setUserName(userList.get(i).getUsername());
@@ -146,6 +156,9 @@ public class UserService {
             pointsDto.getUserPointsList().add(userPoints);
         }
 
+        for(int i=0; i<userList.size(); i++){
+            userList.get(i).setActivityStatus(ApplicationConstants.INACTIVE);
+        }
         return pointsDto;
 
     }

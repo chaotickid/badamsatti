@@ -19,4 +19,9 @@ public class ApplicationConstants {
     public static final String CLOSED = "CLOSED";
     public static final String WIN = "WIN";
     public static final String ERROR = "ERROR";
+    public static final String NOT_PLAYED = "NOT_PLAYED";
+    public static final String PLAYED = "PLAYED";
+    public static final String JOINED_LOBBY = "JOINED_LOBBY";
+    public static final String PLAYING = "PLAYING";
+    public static final String INACTIVE = "INACTIVE";
 }

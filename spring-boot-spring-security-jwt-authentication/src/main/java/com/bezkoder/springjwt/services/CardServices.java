@@ -78,14 +78,10 @@ public class CardServices {
             }
 
         }
-//        HashMap<Integer, List<Integer>> hashMap =  new HashMap<>();
 
-//        for(int i=0; i<userList.size(); i++){
-//            hashMap.put(userList.get(i).getUserId(), userList.get(i).getCardIdList());
-//        }
-//        firstDistribution.setBadamSattiUserId(badamSattiUserId);
-//        firstDistribution.setDistributedCardList(hashMap);
-//        return firstDistribution;
+        for(int i=0; i<userList.size(); i++){
+            userList.get(i).setActivityStatus(ApplicationConstants.PLAYING);
+        }
     }
 
     public int generate6DigitCode(){
