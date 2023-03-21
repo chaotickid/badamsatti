@@ -48,6 +48,8 @@ public class Lobby {
 
     private String timeStampOfLobbyCreation;
 
+    private int noOfCatsForCurrentLobby= 1;
+
 //    @Transient
 //    private LinkedList<Integer> sequenceOfUserId= new LinkedList<>();
     @Transient

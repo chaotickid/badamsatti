@@ -7,19 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Aditya Patil
- * @Date 12-03-2023
+ * @Date 16-03-2023
  */
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChattingWindow {
-
+public class UserCardDetailsDto {
     private int userId;
-
-    private int joinCode;
     private String userName;
-    private String userMessage;
+    private List<Integer> cardList = new ArrayList<>();
 }

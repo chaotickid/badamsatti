@@ -47,8 +47,8 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @Transient
-    private List<Integer> cardIdList = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<Card> cardIdList = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "lobby_id")
@@ -64,5 +64,17 @@ public class User {
         this.username = username;
         this.email = email;
         this.password =  password;
+    }
+
+
+    //helper methods card add remove
+    public void addCard(Card card){
+        this.getCardIdList().add(card);
+        card.setUser(this);
+    }
+
+    public void removeCard(Card card){
+        this.removeCard(card);
+        card.setUser(null);
     }
 }

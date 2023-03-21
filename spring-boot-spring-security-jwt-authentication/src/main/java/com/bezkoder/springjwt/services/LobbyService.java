@@ -4,6 +4,7 @@ package com.bezkoder.springjwt.services;
  */
 
 import com.bezkoder.springjwt.DTO.UserDto;
+import com.bezkoder.springjwt.constants.ApplicationConstants;
 import com.bezkoder.springjwt.exceptions.ErrorObject;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.User;
@@ -51,7 +52,7 @@ public class LobbyService {
         lobby1.setLobbyOwnerId(lobby.getLobbyOwnerId());
         lobby1.setLobbySize(lobby.getLobbySize());
         lobby1.setLobbyCode(cardServices.generate6DigitCode());
-        lobby1.setLobbyStatus("ACTIVE");
+        lobby1.setLobbyStatus(ApplicationConstants.WAITING_FOR_PLAYERS);
         lobby1.addUserInTheLobby(user1);
         log.debug("Lobby created successfully by userID " + user1.getUserId() + " name: " + user1.getUsername());
         lobby1.setNoOfConnectPeople(lobby1.getNoOfConnectPeople() + 1);
@@ -68,6 +69,9 @@ public class LobbyService {
         User user1 = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User with id not found: " + userId));
         System.out.println(user1.getUserId() + " : " + user1.getUsername());
         Lobby lobby = lobbyRepository.findByLobbyCode(joinCode);
+        if(lobby.getLobbyStatus().equals(ApplicationConstants.CLOSED)){
+            throw new RuntimeException("Lobby already closed.");
+        }
         if(userId == lobby.getLobbyOwnerId()){
             return new ResponseEntity<>(
                     new ErrorObject(String.valueOf(Instant.now()),
@@ -104,6 +108,11 @@ public class LobbyService {
         lobby.addUserInTheLobby(user1);
         lobby.setNoOfConnectPeople(lobby.getNoOfConnectPeople() + 1);
 //        lobby.getSequenceOfUserId().add(user1.getUserId());
+
+        if(lobby.getNoOfConnectPeople() >= 6){
+            log.debug("Setting cat size: "+ 2 + " for "+ lobby.getNoOfConnectPeople()+ " people.");
+            lobby.setNoOfCatsForCurrentLobby(2);
+        }
         List<User> userList = lobby.getUserList();
         for(int i=0; i< userList.size(); i++){
             lobby.getListOfConnectedUsers().add(new UserDto(

@@ -4,6 +4,8 @@ package com.bezkoder.springjwt.services;
  */
 
 import com.bezkoder.springjwt.DTO.FirstDistribution;
+import com.bezkoder.springjwt.constants.ApplicationConstants;
+import com.bezkoder.springjwt.models.Card;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.User;
 import com.bezkoder.springjwt.repository.LobbyRepository;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.*;
 
 /**
@@ -21,6 +24,7 @@ import java.util.*;
 
 @Service
 @Slf4j
+@Transactional
 public class CardServices {
     @Autowired
     private UserRepository userRepository;
@@ -28,17 +32,26 @@ public class CardServices {
     @Autowired
     private LobbyRepository lobbyRepository;
 
-    public FirstDistribution distributeCards(int lobbyJoinCode) {
+    public void distributeCards(int lobbyJoinCode) {
         FirstDistribution firstDistribution = new FirstDistribution();
 
         List<User> userList = new ArrayList<>();
         Lobby lobby = lobbyRepository.findByLobbyCode(lobbyJoinCode);
+        lobby.setLobbyStatus(ApplicationConstants.CLOSED);
         userList = lobby.getUserList();
         HashMap<Integer, Integer> map = new HashMap<>();
         List<Integer> numbers = new ArrayList<>();
 
         for (int i = 1; i <= 52; i++) {
             numbers.add(i);
+        }
+
+        //if no of coonected people are greater than >= 6 then use two cats
+        //lobby.setNoOfCatsForCurrentLobby(2);
+        if(lobby.getNoOfConnectPeople() >= 6){
+            for (int i = 1; i <= 52; i++) {
+                numbers.add(i);
+            }
         }
 
         int badamSattiUserId = -1;
@@ -58,19 +71,21 @@ public class CardServices {
                 if(numbers.get(k) == 7){
                     badamSattiUserId = userList.get(j).getUserId();
                 }
-                userList.get(j).getCardIdList().add(numbers.get(k));
+                Card card = new Card(numbers.get(k));
+                card.setLobbyJoinCode(lobby.getLobbyCode());
+                userList.get(j).addCard(card);
                 k++;
             }
 
         }
-        HashMap<Integer, List<Integer>> hashMap =  new HashMap<>();
+//        HashMap<Integer, List<Integer>> hashMap =  new HashMap<>();
 
-        for(int i=0; i<userList.size(); i++){
-            hashMap.put(userList.get(i).getUserId(), userList.get(i).getCardIdList());
-        }
-        firstDistribution.setBadamSattiUserId(badamSattiUserId);
-        firstDistribution.setDistributedCardList(hashMap);
-        return firstDistribution;
+//        for(int i=0; i<userList.size(); i++){
+//            hashMap.put(userList.get(i).getUserId(), userList.get(i).getCardIdList());
+//        }
+//        firstDistribution.setBadamSattiUserId(badamSattiUserId);
+//        firstDistribution.setDistributedCardList(hashMap);
+//        return firstDistribution;
     }
 
     public int generate6DigitCode(){

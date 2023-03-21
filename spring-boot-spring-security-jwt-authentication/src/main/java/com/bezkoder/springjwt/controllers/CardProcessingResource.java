@@ -23,8 +23,8 @@ public class CardProcessingResource {
     private CardServices cardDistributionService;
 
     @GetMapping("/distribute")
-    public FirstDistribution shuffleAndDistribute(@RequestParam (name = "joincode") int joinCode){
-        return cardDistributionService.distributeCards(joinCode);
+    public void shuffleAndDistribute(@RequestParam (name = "joincode") int joinCode){
+         cardDistributionService.distributeCards(joinCode);
     }
 
 }

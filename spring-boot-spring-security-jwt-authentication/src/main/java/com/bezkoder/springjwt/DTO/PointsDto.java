@@ -7,17 +7,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Aditya Patil
- * @Date 08-03-2023
+ * @Date 16-03-2023
  */
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class PlayerDetails {
-    private int cardPlayed;
-    private int currentUserId;
-    private int lastPlayedUserId;
-    private int lobbyJoinCode;
+@NoArgsConstructor
+public class PointsDto {
+    private List<UserPoints> userPointsList=new ArrayList<>();
 }

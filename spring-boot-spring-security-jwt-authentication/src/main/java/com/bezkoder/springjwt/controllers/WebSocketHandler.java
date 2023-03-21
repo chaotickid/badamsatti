@@ -1,42 +1,21 @@
 package com.bezkoder.springjwt.controllers;
-/**
- * Copyright © 2023 Mavenir Systems
- */
 
-import com.bezkoder.springjwt.DTO.ChattingWindow;
-import com.bezkoder.springjwt.DTO.FirstDistribution;
-import com.bezkoder.springjwt.DTO.JoinLobbyDetails;
-import com.bezkoder.springjwt.DTO.PlayerDetails;
+import com.bezkoder.springjwt.DTO.*;
 import com.bezkoder.springjwt.constants.ApplicationConstants;
-import com.bezkoder.springjwt.exceptions.BadamSattiExceptio;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.Message;
 import com.bezkoder.springjwt.models.User;
-import com.bezkoder.springjwt.payload.request.LoginRequest;
-import com.bezkoder.springjwt.payload.request.SignupRequest;
-import com.bezkoder.springjwt.payload.response.JwtResponse;
-import com.bezkoder.springjwt.payload.response.MessageResponse;
 import com.bezkoder.springjwt.repository.UserRepository;
+import com.bezkoder.springjwt.services.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-/**
- * @author Aditya Patil
- * @Date 11-03-2023
- */
 
-//TODO: here we need to add logic
 @RestController
-@RequestMapping("/badamsatti")
 public class WebSocketHandler {
 
     @Autowired
@@ -54,130 +33,126 @@ public class WebSocketHandler {
     @Autowired
     UserRepository userRepository;
 
-//    @GetMapping("/getmessage")
-    @MessageMapping("/getmessage")
-    @SendTo("/return")
-    public ResponseEntity<?> handleRequest(@RequestBody Message message) throws JsonProcessingException {
+    @Autowired
+    UserService userService;
 
+    @Autowired
+    SimpMessagingTemplate simpMessagingTemplate;
+
+
+    @MessageMapping("/badamsatti/getmessage") // -> /app/badamsatti/getmessage
+//    @SendTo("/subscribe/get-subscription")
+    public void handleRequest(@RequestBody Message message) throws JsonProcessingException {
+        System.out.println("<<<<<<<<<<<<<<<<<<<<<< HANDLING MESSAGING REQUEST >>>>>>>>>>>>>>>>>>>>");
         ObjectMapper objectMapper = new ObjectMapper();
+        System.out.println("Message object in WebSocketHandler: " + message);
+        Message sendMessage = new Message();
+
+        String destinationUrl = null;
+
+
+        //TODO::::::::::::::::::::::::::::::::::::::::::::::: WIN ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        try {
+            if (message.getMsg().equals(ApplicationConstants.WIN)) {
+                JoinLobbyDetails joinLobbyDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), JoinLobbyDetails.class);
+                PointsDto pointsDto = userService.calculatePoints(joinLobbyDetails.getLobbyId());
+                sendMessage.setMsg(ApplicationConstants.WIN);
+                sendMessage.setRequestBody(pointsDto);
+                destinationUrl = "/subscribe/get-subscription/" + joinLobbyDetails.getLobbyId();
+                simpMessagingTemplate.convertAndSend("/subscribe/get-subscription/" + joinLobbyDetails.getLobbyId(), sendMessage);
+            }
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+            sendMessage.setMsg(ApplicationConstants.ERROR);
+            sendMessage.setRequestBody("Unable to calculate win points");
+            if (null != destinationUrl) {
+                simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
+            }
+        }
+
+
+        //TODO::::::::::::::::::::::::::::::::::::::::::::::: CHATTING_APP :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
         try {
             if (message.getMsg().equals(ApplicationConstants.CHATTING_APP)) {
                 ChattingWindow chattingWindow = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), ChattingWindow.class);
                 User user = userRepository.findById(chattingWindow.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
                 chattingWindow.setUserName(user.getUsername());
-
-                Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.CHATTING_APP);
                 sendMessage.setRequestBody(chattingWindow);
-                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+                destinationUrl = "/subscribe/get-subscription/" + chattingWindow.getJoinCode();
+                simpMessagingTemplate.convertAndSend("/subscribe/get-subscription/" + chattingWindow.getJoinCode(), sendMessage);
             }
-        }catch (Exception e){
-            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.CHATTING_APP);
-            System.out.println("Exception: "+ badamSattiExceptio);
-            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        if (message.getMsg().equals(ApplicationConstants.SIGNUP_USER)) {
-            try {
-                SignupRequest signupRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), SignupRequest.class);
-                MessageResponse object = (MessageResponse) authController.registerUser(signupRequest).getBody();
-
-                Message sendMessage = new Message();
-                sendMessage.setMsg(ApplicationConstants.SIGNUP_USER);
-                sendMessage.setRequestBody(object);
-                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
-            } catch (Exception e) {
-                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNUP_USER);
-                System.out.println("Exception: "+ badamSattiExceptio);
-                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+            sendMessage.setMsg(ApplicationConstants.ERROR);
+            sendMessage.setRequestBody("Unable to send messages");
+            if (null != destinationUrl) {
+                simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
             }
         }
 
-//        if (message.getMsg().equals(ApplicationConstants.SIGNIN_USER)) {
-//            try {
-//                //LoginRequest
-//                LoginRequest loginRequest = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), LoginRequest.class);
-//                JwtResponse object = (JwtResponse) authController.authenticateUser(loginRequest).getBody();
-//
-//                Message sendMessage = new Message();
-//                sendMessage.setMsg(ApplicationConstants.SIGNIN_USER);
-//                sendMessage.setRequestBody(object);
-//                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
-//            } catch (Exception e) {
-//                BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.SIGNIN_USER);
-//                System.out.println("Exception: "+ badamSattiExceptio);
-//                return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
-//            }
-//        }
-
-        //-------------------------------------Lobby----------------------------------------------
-//        try { //727332
-//            if (message.getMsg().equals(ApplicationConstants.CREATE_LOBBY)) {
-//                Lobby lobby = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), Lobby.class);
-//                Lobby object = lobbyController.createLobby(lobby).getBody();
-//                Message sendMessage = new Message();
-//                sendMessage.setMsg(ApplicationConstants.CREATE_LOBBY);
-//                sendMessage.setRequestBody(object);
-//                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
-//            }
-//        } catch (Exception e) {
-//            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.CREATE_LOBBY);
-//            System.out.println("Exception: "+ badamSattiExceptio);
-//            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
+        //TODO::::::::::::::::::::::::::::::::::::::::::::::: JOIN_LOBBY :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
         try {
             if (message.getMsg().equals(ApplicationConstants.JOIN_LOBBY)) {
                 JoinLobbyDetails joinLobbyDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), JoinLobbyDetails.class);
                 Lobby object = (Lobby) lobbyController.joinLobby(joinLobbyDetails.getLobbyId(), joinLobbyDetails.getUserId()).getBody();
-                Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.JOIN_LOBBY);
                 sendMessage.setRequestBody(object);
-                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+                destinationUrl = "/subscribe/get-subscription/" + joinLobbyDetails.getLobbyId();
+                simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
             }
         } catch (Exception e) {
-            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.JOIN_LOBBY);
-            System.out.println("Exception: "+ badamSattiExceptio);
-            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+            System.out.println("Exception: " + e);
+            sendMessage.setMsg(ApplicationConstants.ERROR);
+            sendMessage.setRequestBody("Unable to join lobby.");
+            if (null != destinationUrl) {
+                simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
+            }
         }
 
 
-        //-------------------------------------------- DISTRIBUTE ----------------------------------------------------
+        //TODO::::::::::::::::::::::::::::::::::::::::::::::: CARD_DISTRIBUTE :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
         try {
             if (message.getMsg().equals(ApplicationConstants.CARD_DISTRIBUTE)) {
                 JoinLobbyDetails joinLobbyDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), JoinLobbyDetails.class);
-                FirstDistribution object = cardProcessingResource.shuffleAndDistribute(joinLobbyDetails.getLobbyId());
-                Message sendMessage = new Message();
+                cardProcessingResource.shuffleAndDistribute(joinLobbyDetails.getLobbyId());
                 sendMessage.setMsg(ApplicationConstants.CARD_DISTRIBUTE);
-                sendMessage.setRequestBody(object);
-                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+                sendMessage.setRequestBody("GAME_STARTED");
+                destinationUrl = "/subscribe/get-subscription/" + joinLobbyDetails.getLobbyId();
+                simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
+
             }
         } catch (Exception e) {
-            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.CARD_DISTRIBUTE);
-            System.out.println("Exception: "+ badamSattiExceptio);
-            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+            System.out.println("Exception: " + e);
+            sendMessage.setMsg(ApplicationConstants.ERROR);
+            sendMessage.setRequestBody("Unable to distribute cards for the current lobby");
+            if (null != destinationUrl) {
+                simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
+            }
         }
+
+        //TODO::::::::::::::::::::::::::::::::::::::::::::::: FIND_NEXT_PLAYER :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
         try {
             if (message.getMsg().equals(ApplicationConstants.FIND_NEXT_PLAYER)) {
                 PlayerDetails playerDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), PlayerDetails.class);
                 PlayerDetails object = nextPlayerFinder.findNextPlayer(playerDetails);
-                Message sendMessage = new Message();
                 sendMessage.setMsg(ApplicationConstants.FIND_NEXT_PLAYER);
                 sendMessage.setRequestBody(object);
-                return new ResponseEntity<>(sendMessage, HttpStatus.OK);
+                destinationUrl = "/subscribe/get-subscription/" + playerDetails.getLobbyJoinCode();
+                simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
             }
         } catch (Exception e) {
-            BadamSattiExceptio badamSattiExceptio = new BadamSattiExceptio(e.getMessage(), ApplicationConstants.FIND_NEXT_PLAYER);
-            System.out.println("Exception: "+ badamSattiExceptio);
-            return new ResponseEntity<>(badamSattiExceptio, HttpStatus.INTERNAL_SERVER_ERROR);
+            System.out.println("Exception: " + e);
+            sendMessage.setMsg(ApplicationConstants.ERROR);
+            sendMessage.setRequestBody("Unable to find next player. Something went wrong.");
+            if (null != destinationUrl) {
+                simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
+            }
         }
-
-
-        return null;
-
     }
 }
 

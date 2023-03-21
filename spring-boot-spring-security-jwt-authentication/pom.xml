@@ -29,6 +29,12 @@
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
+			<version>1.1</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -48,7 +54,8 @@
 			<version>2.1.1</version>
 		</dependency>
 
-<!--		web jar dependency-->
+
+		<!--		web jar dependency-->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
