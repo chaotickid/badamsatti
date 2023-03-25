@@ -21,4 +21,6 @@ public class Message {
 
     private Object requestBody;
 
+    private Object badamSattiOwnerId;
+
 }

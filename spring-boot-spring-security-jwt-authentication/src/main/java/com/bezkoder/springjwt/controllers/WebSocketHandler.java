@@ -118,9 +118,10 @@ public class WebSocketHandler {
         try {
             if (message.getMsg().equals(ApplicationConstants.CARD_DISTRIBUTE)) {
                 JoinLobbyDetails joinLobbyDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), JoinLobbyDetails.class);
-                cardProcessingResource.shuffleAndDistribute(joinLobbyDetails.getLobbyId());
+                int badamsattiuserId = cardProcessingResource.shuffleAndDistribute(joinLobbyDetails.getLobbyId());
                 sendMessage.setMsg(ApplicationConstants.CARD_DISTRIBUTE);
                 sendMessage.setRequestBody("GAME_STARTED");
+                sendMessage.setBadamSattiOwnerId(badamsattiuserId);
                 destinationUrl = "/subscribe/get-subscription/" + joinLobbyDetails.getLobbyId();
                 simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
 

@@ -32,7 +32,7 @@ public class CardServices {
     @Autowired
     private LobbyRepository lobbyRepository;
 
-    public void distributeCards(int lobbyJoinCode) {
+    public int distributeCards(int lobbyJoinCode) {
         FirstDistribution firstDistribution = new FirstDistribution();
 
         List<User> userList = new ArrayList<>();
@@ -55,7 +55,6 @@ public class CardServices {
         }
 
         int badamSattiUserId = -1;
-
         log.debug("User size: "+ userList);
         log.debug("Added numbers: " + numbers);
         Collections.shuffle(numbers);
@@ -82,6 +81,7 @@ public class CardServices {
         for(int i=0; i<userList.size(); i++){
             userList.get(i).setActivityStatus(ApplicationConstants.PLAYING);
         }
+        return badamSattiUserId;
     }
 
     public int generate6DigitCode(){
