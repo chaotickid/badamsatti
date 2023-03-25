@@ -22,6 +22,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.bezkoder.springjwt.security.jwt.AuthEntryPointJwt;
 import com.bezkoder.springjwt.security.jwt.AuthTokenFilter;
 import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableGlobalMethodSecurity(
@@ -29,6 +34,22 @@ import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
     // jsr250Enabled = true,
     prePostEnabled = true)
 public class WebSecurityConfig  extends WebSecurityConfigurerAdapter {
+
+
+
+  @Bean
+  CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CustomCorsConfiguration();
+    configuration.setAllowedOrigins(List.of  ("*"));
+    configuration.setAllowedMethods(List.of("HEAD","GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
+    configuration.setAllowedHeaders(List.of("Content-Type", "Accept", "Accept-Encoding", "Content-Encoding", "Authorization"));
+    configuration.setAllowCredentials(true);
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
+
+
 //  @Override
 //  public void configure(WebSecurity web) throws Exception {
 //    web.ignoring().antMatchers("/**");
