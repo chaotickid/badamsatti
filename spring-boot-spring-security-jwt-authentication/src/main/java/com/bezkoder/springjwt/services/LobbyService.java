@@ -65,53 +65,54 @@ public class LobbyService {
     }
 
     public ResponseEntity<?> joinLobby(int joinCode, int userId)  {
-        //UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user1 = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User with id not found: " + userId));
-        if(user1.getActivityStatus().equals(ApplicationConstants.PLAYING)){
-            throw new RuntimeException("User is already playing");
-        }
         System.out.println(user1.getUserId() + " : " + user1.getUsername());
         Lobby lobby = lobbyRepository.findByLobbyCode(joinCode);
 
         if(lobby.getLobbyStatus().equals(ApplicationConstants.CLOSED)){
             throw new RuntimeException("Lobby already closed.");
         }
-        if(userId == lobby.getLobbyOwnerId()){
-            return new ResponseEntity<>(
-                    new ErrorObject(String.valueOf(Instant.now()),
-                            "This user created lobby and already joined the lobby", HttpStatus.NOT_FOUND)
-                    , HttpStatus.NOT_FOUND);
-        }
+//        if(userId == lobby.getLobbyOwnerId()){
+//            return new ResponseEntity<>(
+//                    new ErrorObject(String.valueOf(Instant.now()),
+//                            "This user created lobby and already joined the lobby", HttpStatus.NOT_FOUND)
+//                    , HttpStatus.NOT_FOUND);
+//        }
 
 
+        //searching lobby is present or not
         if (lobby == null) {
-            return new ResponseEntity<>(
-                    new ErrorObject(String.valueOf(Instant.now()), "Lobby not found", HttpStatus.NOT_FOUND)
-                    , HttpStatus.NOT_FOUND);
+            throw new RuntimeException("Lobby not found");
 
         }
-        if (lobby.getUserList().size() == lobby.getLobbySize()) {
-            return new ResponseEntity<>(
-                    new ErrorObject(String.valueOf(Instant.now()), "Lobby is full", HttpStatus.NOT_FOUND)
-                    , HttpStatus.NOT_FOUND);
-        }
+
+        //searching if user is disconnected or somthing is happened in between then return lobby details
         AtomicBoolean flag = new AtomicBoolean(false);
         lobby.getUserList().forEach(t -> {
             if (t.getUserId() == user1.getUserId()) {
                 flag.set(true);
-                //throw new RuntimeException("User with username: " + user.getUsername() + " already joined");
+
 
             }
         });
 
-        if(flag.get())
-            return new ResponseEntity<>(
-                    new ErrorObject(String.valueOf(Instant.now()), "User already joined", HttpStatus.INTERNAL_SERVER_ERROR)
-                    , HttpStatus.INTERNAL_SERVER_ERROR);
+        if(flag.get()){ //allowing user to join again
+            List<User> userList = lobby.getUserList();
+            for(int i=0; i< userList.size(); i++){
+                lobby.getListOfConnectedUsers().add(new UserDto(
+                        userList.get(i).getUserId(), userList.get(i).getUsername()
+                ));
+            }
+            return new ResponseEntity<>(lobby, HttpStatus.OK);
+        }
+
+        //else new user want to join but need to check lobby size
+        if (lobby.getUserList().size() == lobby.getLobbySize()) {
+            throw new RuntimeException("Lobby is full");
+        }
 
         lobby.addUserInTheLobby(user1);
         lobby.setNoOfConnectPeople(lobby.getNoOfConnectPeople() + 1);
-//        lobby.getSequenceOfUserId().add(user1.getUserId());
 
         if(lobby.getNoOfConnectPeople() >= 6){
             log.debug("Setting cat size: "+ 2 + " for "+ lobby.getNoOfConnectPeople()+ " people.");
