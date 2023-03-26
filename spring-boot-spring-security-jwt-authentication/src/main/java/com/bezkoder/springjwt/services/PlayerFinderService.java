@@ -53,8 +53,9 @@ public class PlayerFinderService {
             for(int i=0; i< cardList.size(); i++){
                 if(cardList.get(i).getCardNumber() == playerDetails.getCardPlayed()){
                     System.out.println("Card Number: " + cardList.get(i).getCardNumber());
-                    cardList.get(i).setCardPlacedStatus(ApplicationConstants.PLAYED);
-                    System.out.println(cardList.get(i).getCardPlacedStatus());
+                    cardList.remove(cardList.get(i));
+                    //cardList.get(i).setCardPlacedStatus(ApplicationConstants.PLAYED);
+                    //System.out.println(cardList.get(i).getCardPlacedStatus());
                     break;
                 }
             }

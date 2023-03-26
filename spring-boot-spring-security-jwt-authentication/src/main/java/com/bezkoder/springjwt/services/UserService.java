@@ -49,7 +49,7 @@ public class UserService {
 
     public HashMap<Integer, Integer> cardPoints(){
         HashMap<Integer, Integer> map = new HashMap<>();
-        map.put(1,13);
+        map.put(1,13);//ekka
         map.put(2,2);
         map.put(3,3);
         map.put(4,4);
@@ -62,7 +62,7 @@ public class UserService {
         map.put(11,11);
         map.put(12,12);
         map.put(13,13);
-        map.put(14,13);
+        map.put(14,13);//ekka
         map.put(15,2);
         map.put(16,3);
         map.put(17,4);
@@ -75,7 +75,7 @@ public class UserService {
         map.put(24,11);
         map.put(25,12);
         map.put(26,13);
-        map.put(27,13);
+        map.put(27,13);//ekka
         map.put(28,2);
         map.put(29,3);
         map.put(30,4);
@@ -88,7 +88,7 @@ public class UserService {
         map.put(37,11);
         map.put(38,12);
         map.put(39,13);
-        map.put(40,13);
+        map.put(40,13);//ekka
         map.put(41,2);
         map.put(42,3);
         map.put(43,4);
@@ -135,18 +135,29 @@ public class UserService {
     }
 
     public PointsDto calculatePoints(int joinCode){
+
+        //actual points to .png photos
         HashMap<Integer, Integer> map = cardPoints();
+
+        //lift lobby
         Lobby lobby = lobbyRepository.findByLobbyCode(joinCode);
+
+        //fetch userList
         List<User> userList = lobby.getUserList();
+        userList.forEach(t-> System.out.println(t.getUserId()));
 
         PointsDto pointsDto= new PointsDto();
 
         for(int i=0; i<userList.size(); i++){
             UserPoints userPoints = new UserPoints();
             List<Card> cardList = userList.get(i).getCardIdList();
+            cardList.forEach(t-> System.out.print("[ "+ t.getCardNumber() + " "));
+            System.out.print(" ]");
             int result= 0;
             for(int j=0; j<cardList.size(); j++){
                 if(cardList.get(j).getCardPlacedStatus().equals(ApplicationConstants.NOT_PLAYED)) {
+                    System.out.println("cardListstatus :" + cardList.get(j).getCardPlacedStatus());
+                    System.out.println("Userid: " + userList.get(i).getUserId() + ", not played card actual points: "+ map.get(cardList.get(j).getCardNumber()) + ", png no: "+ (cardList.get(j).getCardNumber()));
                     result = result + map.get(cardList.get(j).getCardNumber());
                 }
             }

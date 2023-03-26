@@ -8,6 +8,7 @@ import com.bezkoder.springjwt.constants.ApplicationConstants;
 import com.bezkoder.springjwt.models.Card;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.User;
+import com.bezkoder.springjwt.repository.CardRepository;
 import com.bezkoder.springjwt.repository.LobbyRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -32,16 +33,24 @@ public class CardServices {
     @Autowired
     private LobbyRepository lobbyRepository;
 
+    @Autowired
+    private CardRepository cardRepository;
+
     public int distributeCards(int lobbyJoinCode) {
         FirstDistribution firstDistribution = new FirstDistribution();
 
         List<User> userList = new ArrayList<>();
         Lobby lobby = lobbyRepository.findByLobbyCode(lobbyJoinCode);
-        lobby.setLobbyStatus(ApplicationConstants.CLOSED);
+
         userList = lobby.getUserList();
         HashMap<Integer, Integer> map = new HashMap<>();
         List<Integer> numbers = new ArrayList<>();
 
+
+
+        if(lobby.getLobbyStatus().equals(ApplicationConstants.CLOSED)){
+            throw new RuntimeException("Card distribution is already completed");
+        }
         for (int i = 1; i <= 52; i++) {
             numbers.add(i);
         }
@@ -78,9 +87,14 @@ public class CardServices {
 
         }
 
+
+        System.out.println("Printing card list after distribution");
         for(int i=0; i<userList.size(); i++){
+            userList.get(i).getCardIdList().forEach(t -> System.out.print(t.getCardNumber()+","));
+            System.out.println();
             userList.get(i).setActivityStatus(ApplicationConstants.PLAYING);
         }
+        lobby.setLobbyStatus(ApplicationConstants.CLOSED);
         return badamSattiUserId;
     }
 
@@ -88,5 +102,13 @@ public class CardServices {
         int code = (int) (Math.random() * 900000) + 100000; // Generates a random integer between 100000 and 999999
         log.debug("Code: " + code);
         return code; // Convert integer to string and return
+    }
+
+    public void makeAllPlayed(int lobbyId, int userId){
+        List<Card> cardList = cardRepository.findByLobbyJoinCodeAndUserUserId(lobbyId, userId);
+
+        for(int i=0; i< cardList.size(); i++){
+            cardList.get(i).setCardPlacedStatus("PLAYED");
+        }
     }
 }
