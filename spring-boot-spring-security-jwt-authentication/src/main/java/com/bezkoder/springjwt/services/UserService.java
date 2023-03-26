@@ -139,38 +139,60 @@ public class UserService {
         //actual points to .png photos
         HashMap<Integer, Integer> map = cardPoints();
 
-        //lift lobby
         Lobby lobby = lobbyRepository.findByLobbyCode(joinCode);
-
-        //fetch userList
         List<User> userList = lobby.getUserList();
-        userList.forEach(t-> System.out.println(t.getUserId()));
-
         PointsDto pointsDto= new PointsDto();
 
         for(int i=0; i<userList.size(); i++){
-            UserPoints userPoints = new UserPoints();
-            List<Card> cardList = userList.get(i).getCardIdList();
-            cardList.forEach(t-> System.out.print("[ "+ t.getCardNumber() + " "));
-            System.out.print(" ]");
+            int userId = userList.get(i).getUserId();
+            List <Card> cardList = cardRepository.findByLobbyJoinCodeAndUserUserId(joinCode,userId);
+            System.out.println("List size :"+cardList.size() );
+
             int result= 0;
             for(int j=0; j<cardList.size(); j++){
-                if(cardList.get(j).getCardPlacedStatus().equals(ApplicationConstants.NOT_PLAYED)) {
-                    System.out.println("cardListstatus :" + cardList.get(j).getCardPlacedStatus());
-                    System.out.println("Userid: " + userList.get(i).getUserId() + ", not played card actual points: "+ map.get(cardList.get(j).getCardNumber()) + ", png no: "+ (cardList.get(j).getCardNumber()));
-                    result = result + map.get(cardList.get(j).getCardNumber());
-                }
+                result = result + map.get(cardList.get(i).getCardNumber());
             }
-            userPoints.setUserId(userList.get(i).getUserId());
+            UserPoints userPoints = new UserPoints();
+            userPoints.setUserId(userId);
             userPoints.setUserName(userList.get(i).getUsername());
             userPoints.setTotalPoints(result);
             pointsDto.getUserPointsList().add(userPoints);
         }
-
-        for(int i=0; i<userList.size(); i++){
-            userList.get(i).setActivityStatus(ApplicationConstants.INACTIVE);
-        }
         return pointsDto;
+
+
+        //lift lobby
+//        Lobby lobby = lobbyRepository.findByLobbyCode(joinCode);
+//
+//        //fetch userList
+//        List<User> userList = lobby.getUserList();
+//        userList.forEach(t-> System.out.println(t.getUserId()));
+//
+//        PointsDto pointsDto= new PointsDto();
+//
+//        for(int i=0; i<userList.size(); i++){
+//            UserPoints userPoints = new UserPoints();
+//            List<Card> cardList = userList.get(i).getCardIdList();
+//            cardList.forEach(t-> System.out.print("[ "+ t.getCardNumber() + " "));
+//            System.out.print(" ]");
+//            int result= 0;
+//            for(int j=0; j<cardList.size(); j++){
+//                if(cardList.get(j).getCardPlacedStatus().equals(ApplicationConstants.NOT_PLAYED)) {
+//                    System.out.println("cardListstatus :" + cardList.get(j).getCardPlacedStatus());
+//                    System.out.println("Userid: " + userList.get(i).getUserId() + ", not played card actual points: "+ map.get(cardList.get(j).getCardNumber()) + ", png no: "+ (cardList.get(j).getCardNumber()));
+//                    result = result + map.get(cardList.get(j).getCardNumber());
+//                }
+//            }
+//            userPoints.setUserId(userList.get(i).getUserId());
+//            userPoints.setUserName(userList.get(i).getUsername());
+//            userPoints.setTotalPoints(result);
+//            pointsDto.getUserPointsList().add(userPoints);
+//        }
+//
+//        for(int i=0; i<userList.size(); i++){
+//            userList.get(i).setActivityStatus(ApplicationConstants.INACTIVE);
+//        }
+//        return pointsDto;
 
     }
 
