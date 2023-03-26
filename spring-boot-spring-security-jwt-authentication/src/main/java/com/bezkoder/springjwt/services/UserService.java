@@ -150,7 +150,8 @@ public class UserService {
 
             int result= 0;
             for(int j=0; j<cardList.size(); j++){
-                result = result + map.get(cardList.get(i).getCardNumber());
+                System.out.println("Userid: " + userList.get(i).getUserId() + ", not played card actual points: "+ map.get(cardList.get(j).getCardNumber()) + ", png no: "+ (cardList.get(j).getCardNumber()));
+                result = result + map.get(cardList.get(j).getCardNumber());
             }
             UserPoints userPoints = new UserPoints();
             userPoints.setUserId(userId);
