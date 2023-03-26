@@ -24,6 +24,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Aditya Patil
@@ -146,7 +147,11 @@ public class UserService {
         for(int i=0; i<userList.size(); i++){
             int userId = userList.get(i).getUserId();
             List <Card> cardList = cardRepository.findByLobbyJoinCodeAndUserUserId(joinCode,userId);
-            System.out.println("List size :"+cardList.size() );
+            System.out.println(cardList.size());
+            cardList = cardList.stream().filter(t->t.getLobbyJoinCode()==joinCode).collect(Collectors.toList());
+
+            System.out.println("----------------------------------");
+            System.out.println(cardList.size());
 
             int result= 0;
             for(int j=0; j<cardList.size(); j++){

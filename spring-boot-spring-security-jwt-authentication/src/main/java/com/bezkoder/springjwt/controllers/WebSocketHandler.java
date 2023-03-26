@@ -140,6 +140,7 @@ public class WebSocketHandler {
         //TODO::::::::::::::::::::::::::::::::::::::::::::::: FIND_NEXT_PLAYER :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
         try {
+            Thread.sleep(500);
             if (message.getMsg().equals(ApplicationConstants.FIND_NEXT_PLAYER)) {
                 PlayerDetails playerDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), PlayerDetails.class);
                 PlayerDetails object = nextPlayerFinder.findNextPlayer(playerDetails);
