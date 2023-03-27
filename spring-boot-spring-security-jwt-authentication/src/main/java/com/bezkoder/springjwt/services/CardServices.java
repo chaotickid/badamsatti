@@ -111,4 +111,22 @@ public class CardServices {
             cardList.get(i).setCardPlacedStatus("PLAYED");
         }
     }
+
+
+    public void getAllCards(Integer joinCode){
+        List<Card> cardList = cardRepository.findAll();
+
+        for(int i=0; i<cardList.size(); i++){
+
+            if(joinCode !=null && joinCode == cardList.get(i).getLobbyJoinCode()) {
+                System.out.println(cardList.get(i).getId() + "  " + cardList.get(i).getCardNumber()
+                        + "  " + cardList.get(i).getCardPlacedStatus() + "  " +
+                        cardList.get(i).getLobbyJoinCode() + "  " + cardList.get(i).getUser().getUserId()+"  <-------------");
+            }else{
+                System.out.println(cardList.get(i).getId() + "  " + cardList.get(i).getCardNumber()
+                        + "  " + cardList.get(i).getCardPlacedStatus() + "  " +
+                        cardList.get(i).getLobbyJoinCode() + "  " + cardList.get(i).getUser().getUserId());
+            }
+        }
+    }
 }
