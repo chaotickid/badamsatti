@@ -8,6 +8,7 @@ import com.bezkoder.springjwt.constants.ApplicationConstants;
 import com.bezkoder.springjwt.models.Card;
 import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.User;
+import com.bezkoder.springjwt.repository.CardRepository;
 import com.bezkoder.springjwt.repository.LobbyRepository;
 import com.bezkoder.springjwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class PlayerFinderService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CardRepository cardRepository;
+
     public PlayerDetails getListOfSequenceOfUserId(PlayerDetails playerDetails) throws Exception {
         Lobby lobby = lobbyRepository.findByLobbyCode(playerDetails.getLobbyJoinCode());
         List<User> userList = lobby.getUserList();
@@ -48,13 +52,13 @@ public class PlayerFinderService {
 
         //Update that particular card as placed
         User user = userRepository.findById(currentUserId).orElseThrow(()-> new RuntimeException("User not found"));
-        List<Card> cardList = user.getCardIdList();
+        List<Card> cardList = cardRepository.findByLobbyJoinCodeAndUserUserId(playerDetails.getLobbyJoinCode(), currentUserId);
         if(cardList.size()!=0){
             for(int i=0; i< cardList.size(); i++){
                 if(cardList.get(i).getCardNumber() == playerDetails.getCardPlayed()){
                     System.out.println("Card Number: " + cardList.get(i).getCardNumber());
-                    cardList.remove(cardList.get(i));
-                    //cardList.get(i).setCardPlacedStatus(ApplicationConstants.PLAYED);
+                    //cardList.remove(cardList.get(i));
+                    cardList.get(i).setCardPlacedStatus(ApplicationConstants.PLAYED);
                     //System.out.println(cardList.get(i).getCardPlacedStatus());
                     break;
                 }
