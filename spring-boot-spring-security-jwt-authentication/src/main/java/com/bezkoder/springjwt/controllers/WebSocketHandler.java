@@ -6,6 +6,7 @@ import com.bezkoder.springjwt.models.Lobby;
 import com.bezkoder.springjwt.models.Message;
 import com.bezkoder.springjwt.models.User;
 import com.bezkoder.springjwt.repository.UserRepository;
+import com.bezkoder.springjwt.services.PlayerFinderService;
 import com.bezkoder.springjwt.services.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +39,9 @@ public class WebSocketHandler {
 
     @Autowired
     SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    PlayerFinderService playerFinderService;
 
 
     @MessageMapping("/badamsatti/getmessage") // -> /app/badamsatti/getmessage
@@ -145,6 +149,7 @@ public class WebSocketHandler {
                 PlayerDetails playerDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), PlayerDetails.class);
                 int lobbyId = playerDetails.getLobbyJoinCode();
                 if(playerDetails.getNoOfCardsRemainig()==0){
+                    playerFinderService.updateLastCard(playerDetails);
                     try {
                             PointsDto pointsDto = userService.calculatePoints(lobbyId);
                             sendMessage.setMsg(ApplicationConstants.WIN);

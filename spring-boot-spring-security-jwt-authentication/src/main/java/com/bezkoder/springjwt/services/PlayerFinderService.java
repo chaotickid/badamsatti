@@ -91,4 +91,20 @@ public class PlayerFinderService {
         playerDetails.setCurrentUserId(currentUserId);
         return playerDetails;
     }
+
+    public void updateLastCard(PlayerDetails playerDetails){
+        List<Card> cardList = cardRepository.findByLobbyJoinCodeAndUserUserId(playerDetails.getLobbyJoinCode(), playerDetails.getCurrentUserId());
+        if(cardList.size()!=0){
+            for(int i=0; i< cardList.size(); i++){
+                if(cardList.get(i).getCardNumber() == playerDetails.getCardPlayed()){
+                    System.out.println("Card Number: " + cardList.get(i).getCardNumber());
+                    //cardList.remove(cardList.get(i));
+                    cardList.get(i).setCardPlacedStatus(ApplicationConstants.PLAYED);
+                    //System.out.println(cardList.get(i).getCardPlacedStatus());
+                    break;
+                }
+            }
+        }
+
+    }
 }
