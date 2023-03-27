@@ -20,4 +20,5 @@ public class PlayerDetails {
     private int currentUserId;
     private int lastPlayedUserId;
     private int lobbyJoinCode;
+    private int noOfCardsRemainig;
 }

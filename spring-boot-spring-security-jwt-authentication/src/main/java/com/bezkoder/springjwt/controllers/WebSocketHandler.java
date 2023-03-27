@@ -137,12 +137,31 @@ public class WebSocketHandler {
             }
         }
 
-        //TODO::::::::::::::::::::::::::::::::::::::::::::::: FIND_NEXT_PLAYER :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        //TODO::::::::::::::::::::::::::::::::::::::::::::::: FIND_NEXT_PLAYER AND WIN :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
         try {
             Thread.sleep(500);
             if (message.getMsg().equals(ApplicationConstants.FIND_NEXT_PLAYER)) {
                 PlayerDetails playerDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), PlayerDetails.class);
+                int lobbyId = playerDetails.getLobbyJoinCode();
+                if(playerDetails.getNoOfCardsRemainig()==0){
+                    try {
+                            PointsDto pointsDto = userService.calculatePoints(lobbyId);
+                            sendMessage.setMsg(ApplicationConstants.WIN);
+                            sendMessage.setRequestBody(pointsDto);
+                            destinationUrl = "/subscribe/get-subscription/" + lobbyId;
+                            simpMessagingTemplate.convertAndSend("/subscribe/get-subscription/" + lobbyId, sendMessage);
+                            return;
+                    } catch (Exception e) {
+                        System.out.println("Exception: " + e);
+                        sendMessage.setMsg(ApplicationConstants.ERROR);
+                        sendMessage.setRequestBody("Unable to calculate win points");
+                        if (null != destinationUrl) {
+                            simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
+                        }
+                        return;
+                    }
+                }
                 PlayerDetails object = nextPlayerFinder.findNextPlayer(playerDetails);
                 sendMessage.setMsg(ApplicationConstants.FIND_NEXT_PLAYER);
                 sendMessage.setRequestBody(object);
