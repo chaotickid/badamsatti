@@ -156,7 +156,7 @@ public class UserService {
             int result= 0;
             for(int j=0; j<cardList.size(); j++){
                 System.out.println("Userid: " + userList.get(i).getUserId() + ", not played card actual points: "+ map.get(cardList.get(j).getCardNumber()) + ", png no: "+ (cardList.get(j).getCardNumber())+", lobby code: "+ joinCode);
-                if(cardList.get(i).getCardPlacedStatus().equals(ApplicationConstants.NOT_PLAYED)) {
+                if(cardList.get(j).getCardPlacedStatus().equals(ApplicationConstants.NOT_PLAYED)) {
                     result = result + map.get(cardList.get(j).getCardNumber());
                 }
             }
