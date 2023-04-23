@@ -101,16 +101,16 @@ public class WebSocketHandler {
         try {
             if (message.getMsg().equals(ApplicationConstants.JOIN_LOBBY)) {
                 JoinLobbyDetails joinLobbyDetails = objectMapper.readValue(objectMapper.writeValueAsString(message.getRequestBody()), JoinLobbyDetails.class);
+                destinationUrl = "/subscribe/get-subscription/" + joinLobbyDetails.getLobbyId();
                 Lobby object = (Lobby) lobbyController.joinLobby(joinLobbyDetails.getLobbyId(), joinLobbyDetails.getUserId()).getBody();
                 sendMessage.setMsg(ApplicationConstants.JOIN_LOBBY);
                 sendMessage.setRequestBody(object);
-                destinationUrl = "/subscribe/get-subscription/" + joinLobbyDetails.getLobbyId();
                 simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
             }
         } catch (Exception e) {
             System.out.println("Exception: " + e);
             sendMessage.setMsg(ApplicationConstants.ERROR);
-            sendMessage.setRequestBody("Unable to join lobby.");
+            sendMessage.setRequestBody("Unable to join lobby. Check the lobby code again.");
             if (null != destinationUrl) {
                 simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
             }
