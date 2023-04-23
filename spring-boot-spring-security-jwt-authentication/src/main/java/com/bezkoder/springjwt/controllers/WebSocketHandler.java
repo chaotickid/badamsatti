@@ -111,6 +111,8 @@ public class WebSocketHandler {
             System.out.println("Exception: " + e);
             sendMessage.setMsg(ApplicationConstants.ERROR);
             sendMessage.setRequestBody("Unable to join lobby. Check the lobby code again.");
+            System.out.println("Error message: " + sendMessage);
+            System.out.println("Destination url: "+ destinationUrl);
             if (null != destinationUrl) {
                 simpMessagingTemplate.convertAndSend(destinationUrl, sendMessage);
             }
